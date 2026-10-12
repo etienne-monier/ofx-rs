@@ -14,7 +14,7 @@ keywords = ["ofx", "finance", "banking", "parser", "sgml"]
 categories = ["finance", "parser-implementations"]
 
 [dependencies]
-quick-xml = "0.39.2"
+quick-xml = "0.41.0"
 rust_decimal = "1.40.0"
 time = "0.3.47"
 
