@@ -300,9 +300,12 @@ fn is_valid_leaf_parent(parent: &str, leaf: &str) -> bool {
     if parent == "FI" {
         return matches!(leaf, "ORG" | "FID");
     }
-    // BANKACCTFROM/TO contain BANKID, ACCTID, ACCTTYPE, BRANCHID
+    // BANKACCTFROM/TO contain BANKID, ACCTID, ACCTTYPE, BRANCHID, ACCTKEY
     if matches!(parent, "BANKACCTFROM" | "BANKACCTTO") {
-        return matches!(leaf, "BANKID" | "ACCTID" | "ACCTTYPE" | "BRANCHID");
+        return matches!(
+            leaf,
+            "BANKID" | "ACCTID" | "ACCTTYPE" | "BRANCHID" | "ACCTKEY"
+        );
     }
     // CCACCTFROM/TO contain ACCTID, ACCTTYPE
     if matches!(parent, "CCACCTFROM" | "CCACCTTO") {
@@ -466,3 +469,4 @@ mod tests {
         assert!(result.contains("<BANKMSGSRSV1>"));
     }
 }
+
