@@ -224,8 +224,15 @@ pub fn normalize_sgml_to_xml(input: &str) -> String {
                 );
             }
         } else {
-            pending_text.push(input.as_bytes()[pos] as char);
-            pos += 1;
+            // Push the whole text run up to the next '<' as-is. Casting each
+            // byte to `char` would turn every byte of a multi-byte UTF-8
+            // character into a separate, wrong character (e.g. "é" would come
+            // out as "Ã©"). `pos` is always on a char boundary here, and a
+            // continuation byte can never be '<' (0x3C), so scanning for it is
+            // UTF-8 safe.
+            let run_end = input[pos..].find('<').map_or(len, |i| pos + i);
+            pending_text.push_str(&input[pos..run_end]);
+            pos = run_end;
         }
     }
 
@@ -413,6 +420,15 @@ mod tests {
         let result = normalize_sgml_to_xml(input);
         assert!(result.contains("<CODE>0</CODE>"));
         assert!(result.contains("<SEVERITY>INFO</SEVERITY>"));
+    }
+
+    #[test]
+    fn preserves_non_ascii_text() {
+        // Text runs must pass through as UTF-8, not byte-by-byte as `char`.
+        let input = "<NAME>CAFÉ LÉON\n<MEMO>Croissants à la boulangerie\n";
+        let result = normalize_sgml_to_xml(input);
+        assert!(result.contains("<NAME>CAFÉ LÉON</NAME>"));
+        assert!(result.contains("<MEMO>Croissants à la boulangerie</MEMO>"));
     }
 
     #[test]
